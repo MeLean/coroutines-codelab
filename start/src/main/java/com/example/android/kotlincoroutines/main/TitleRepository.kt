@@ -18,6 +18,7 @@ package com.example.android.kotlincoroutines.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.yield
 
 /**
@@ -44,9 +45,11 @@ class TitleRepository(val network: MainNetwork, val titleDao: TitleDao) {
 
     suspend fun refreshTitle() {
         runCatching {
-            network.fetchNextTitle().run {
-                yield()
-                titleDao.insertTitle(Title(title = this))
+            withTimeout(5_000){
+                network.fetchNextTitle().run {
+                    yield()
+                    titleDao.insertTitle(Title(title = this))
+                }
             }
         }.onFailure {
             throw TitleRefreshError("Unable to refresh title", it)
